@@ -1,23 +1,26 @@
+# Привет! Если так уместно, то я оставлю свои комментарии
+# под теми правками, в которых не уверен до конца, чтобы объяснить
+# свою логику принятия решения. Так, наверное, будет легче поправить меня,
+# а мне потом разобраться, в случаях, где я окажусь не прав.
+
+from dataclasses import dataclass
+
+
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
 
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float,
-                 ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         """Получить текстовую информацию о тренировке"""
-        return (f'Тип тренировки: {self.training_type}; Длительность: '
-                f'{self.duration:.3f} ч.; Дистанция: {self.distance:.3f} км; '
+        return (f'Тип тренировки: {self.training_type}; '
+                f'Длительность: {self.duration:.3f} ч.; '
+                f'Дистанция: {self.distance:.3f} км; '
                 f'Ср. скорость: {self.speed:.3f} км/ч; '
                 f'Потрачено ккал: {self.calories:.3f}.')
 
@@ -49,12 +52,15 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError(
+            f'Define get_spent_calories in {type(self).__name__}')
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-        return InfoMessage(type(self).__name__, self.duration,
-                           self.get_distance(), self.get_mean_speed(),
+        return InfoMessage(type(self).__name__,
+                           self.duration,
+                           self.get_distance(),
+                           self.get_mean_speed(),
                            self.get_spent_calories())
 
 
@@ -127,10 +133,23 @@ class Swimming(Training):
                 * self.weight * self.duration)
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data: list[float]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    training_types = {'RUN': Running, 'WLK': SportsWalking, 'SWM': Swimming}
-    return training_types[workout_type](*data)
+    # Добавил list, а не List, т.к. последний, как я понял, работает в случае
+    # импорта typing в более старых версиях Python, а на нашем 3.9 с маленькой.
+    # Использовал float, а не int, с логикой, что могут и дробные числа прийти,
+    # например, 1.5 часа тренировки.
+    training_types = {'RUN': Running,
+                      'WLK': SportsWalking,
+                      'SWM': Swimming}
+    if workout_type in training_types:
+        return training_types[workout_type](*data)
+    else:
+        raise ValueError('Wrong name of a training type')
+    # Можно еще всю конструкцию в try-except обернуть, но тогда их надо и далее
+    # по коду, чтобы программа не падала в случае некорректных данных на входе.
+    # Решил, что пока достаточно проверки по ключам и без учета регистра. Без
+    # приведения значений и словаря к lower().
 
 
 def main(training: Training) -> None:
