@@ -4,6 +4,7 @@
 # а мне потом разобраться, в случаях, где я окажусь не прав.
 
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -133,10 +134,11 @@ class Swimming(Training):
                 * self.weight * self.duration)
 
 
-def read_package(workout_type: str, data: list[float]) -> Training:
+def read_package(workout_type: str, data: List[float]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    # Добавил list, а не List, т.к. последний, как я понял, работает в случае
-    # импорта typing в более старых версиях Python, а на нашем 3.9 с маленькой.
+    # Сначала добавил list, а не List, т.к. последний, как я понял, работает по
+    # умолчанию в Python 3.9. Но нарвался на тесты платформы ЯП на Python 3.7.
+    # Пришлось импортировать typing и писать List. Надеюсь, сработает.
     # Использовал float, а не int, с логикой, что могут и дробные числа прийти,
     # например, 1.5 часа тренировки.
     training_types = {'RUN': Running,
